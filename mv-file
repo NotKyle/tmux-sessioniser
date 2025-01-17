@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cp ./tmux-sessioniser /usr/local/bin/tmux-sessioniser
+
+echo "Moved tmux-sessioniser to /usr/local/bin/tmux-sessioniser"
