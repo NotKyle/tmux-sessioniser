@@ -39,7 +39,7 @@ create_windows() {
 
     # Rename the default first window to "Vim" and set its directory
     tmux rename-window -t "$session:1" "Vim"
-    tmux send-keys -t "$session:1" "cd \"$location\" && vim" C-m
+    tmux send-keys -t "$session:1" "cd \"$location\" && vim ." C-m
 
     # Create a second window named "Docker" and set its directory
     tmux new-window -t "$session:2" -n "Docker" -c "$location"
