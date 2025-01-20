@@ -23,7 +23,7 @@ hydrate() {
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find  ~/Desktop/Sites/ ~/Desktop/Projects/ ~/.config/nvim/  -mindepth 1 -maxdepth 1 -type d | fzf)
+    selected=$(find  ~/Desktop/Sites/ ~/.config/nvim/  -mindepth 1 -maxdepth 1 -type d | fzf)
 fi
 
 if [[ -z $selected ]]; then
@@ -35,21 +35,27 @@ tmux_running=$(pgrep tmux)
 
 create_windows() {
     local session=$1
-    tmux rename-window -t "$session:1" "Vim"        # Rename the first window to "Vim"
-    tmux send-keys -t "$session:1" "vim" C-m        # Send "vim" command to the first window
+    local location=$2
 
-    tmux new-window -t "$session" -n "Docker"       # Create a new window named "Docker"
-    tmux send-keys -t "$session:2" "docker ps" C-m  # Send "docker ps" command to the second window
+    # Rename the default first window to "Vim" and set its directory
+    tmux rename-window -t "$session:1" "Vim"
+    tmux send-keys -t "$session:1" "cd \"$location\" && vim" C-m
 
-    tmux new-window -t "$session" -n "Shell"        # Create a new window named "Shell"
-    tmux send-keys -t "$session:3" "zsh" C-m        # Send "zsh" command to the third window
+    # Create a second window named "Docker" and set its directory
+    tmux new-window -t "$session:2" -n "Docker" -c "$location"
+    tmux send-keys -t "$session:2" "cd \"$location\" && docker ps" C-m
 
-    tmux select-window -t "$session:1"              # Select the first window (Vim) by default
+    # Create a third window named "Shell" and set its directory
+    tmux new-window -t "$session:3" -n "Shell" -c "$location"
+    tmux send-keys -t "$session:3" "cd \"$location\" && zsh" C-m
+
+    # Ensure the "Vim" window is selected by default
+    tmux select-window -t "$session:1"
 }
 
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
     tmux new-session -d -s $selected_name -c $selected
-    create_windows $selected_name
+    create_windows "$selected_name" "$selected"
     hydrate $selected_name $selected
     tmux attach-session -t $selected_name
     exit 0
@@ -57,7 +63,7 @@ fi
 
 if ! has_session $selected_name; then
     tmux new-session -d -s $selected_name -c $selected
-    create_windows $selected_name
+    create_windows "$selected_name" "$selected"
     hydrate $selected_name $selected
 fi
 
